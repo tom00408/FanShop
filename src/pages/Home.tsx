@@ -9,8 +9,8 @@ const Home = () => {
       <Box bg="primary.500" color="white" py={20}>
         <Container maxW="1200px">
           <Stack spacing={6} align="center" textAlign="center">
-            <Heading size="2xl">Willkommen im MTV Geismar Fan-Shop</Heading>
-            <Text fontSize="xl">Entdecken Sie unsere exklusive Kollektion an Fanartikeln</Text>
+            <Heading size="2xl">Willkommen im MTV Geismar Shop</Heading>
+            <Text fontSize="xl">Entdecken Sie unsere exklusive Kollektion an Artikeln für Ihren Lieblingsverein</Text>
             <Button
               as={RouterLink}
               to="/shop"

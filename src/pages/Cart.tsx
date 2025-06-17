@@ -53,35 +53,7 @@ const Cart = () => {
 
 	const handleCheckout = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// PDF generieren
-		const doc = new jsPDF();
-		doc.setFontSize(18);
-		doc.text('Rechnung', 14, 18);
-		doc.setFontSize(12);
-		doc.text(`Name: ${form.name}`, 14, 30);
-		doc.text(`Adresse: ${form.address}`, 14, 38);
-		doc.text(`E-Mail: ${form.email}`, 14, 46);
-		doc.text(`Team: ${form.team}`, 14, 54);
-		doc.text(' ', 14, 62);
-		doc.text('Produkte:', 14, 70);
-		let y = 78;
-		items.forEach((item, idx) => {
-			doc.text(
-				`${idx + 1}. ${item.name}${item.size ? ' (' + item.size + ')' : ''} x${item.quantity} á €${item.price.toFixed(2)} = €${(item.price * item.quantity).toFixed(2)}`,
-				14,
-				y
-			);
-			y += 8;
-		});
-		doc.text(' ', 14, y);
-		y += 8;
-		doc.setFontSize(14);
-		doc.text(`Gesamtsumme: €${total.toFixed(2)}`, 14, y);
-		// PDF als Blob-URL erzeugen
-		const pdfBlob = doc.output('blob');
-		const url = URL.createObjectURL(pdfBlob);
-		setPdfUrl(url);
-
+		
 		// Bestellung in Firestore speichern
 		setSending(true);
 		try {
@@ -97,7 +69,10 @@ const Cart = () => {
 					price: item.price,
 					quantity: item.quantity,
 					image: item.image,
-					size: item.size || null
+					size: item.size || null,
+					customName: item.customName || null,
+					customNumber: item.customNumber || null,
+					customInitials: item.customInitials || null
 				})),
 				total,
 				createdAt: new Date(),
@@ -110,7 +85,7 @@ const Cart = () => {
 			const orderRef = await addDoc(collection(db, 'bestellungen'), encryptedOrderData);
 			const orderId = orderRef.id;
 
-			// PDF mit Bestellungs-ID neu generieren
+			// PDF mit Bestellungs-ID generieren
 			const doc = new jsPDF();
 			doc.setFontSize(18);
 			doc.text('Rechnung', 14, 18);
@@ -130,11 +105,35 @@ const Cart = () => {
 					y
 				);
 				y += 8;
+				if (item.customName) {
+					doc.text(`   Name: ${item.customName}`, 18, y);
+					y += 6;
+				}
+				if (item.customNumber) {
+					doc.text(`   Nummer: ${item.customNumber}`, 18, y);
+					y += 6;
+				}
+				if (item.customInitials) {
+					doc.text(`   Initialen: ${item.customInitials}`, 18, y);
+					y += 6;
+				}
 			});
 			doc.text(' ', 14, y);
 			y += 8;
 			doc.setFontSize(14);
 			doc.text(`Gesamtsumme: ${total.toFixed(2)}€`, 14, y);
+
+			y += 8;
+			doc.text(' ', 14, y);
+			y += 8;
+			doc.setFontSize(12);
+			doc.text('Bitte überweisen Sie den Betrag auf das folgende Konto:', 14, y);
+			y += 8;
+			doc.text('Empfänger: FÖV MTV Geismar', 14, y);
+			y += 8;
+			doc.text('IBAN: DE75 2605 0001 0000 1743 00', 14, y);
+			y += 8;
+			doc.text('Bitte geben Sie Ihren Namen & Bestellnummer als Verwendungszweck an.', 14, y);
 
 			// PDF als Blob-URL erzeugen
 			const pdfBlob = doc.output('blob');
@@ -220,6 +219,21 @@ const Cart = () => {
 											Größe: <b>{item.size}</b>
 										</Text>
 									)}
+									{item.customName && (
+										<Text fontSize="sm" color="gray.600">
+											Name: <b>{item.customName}</b>
+										</Text>
+									)}
+									{item.customNumber && (
+										<Text fontSize="sm" color="gray.600">
+											Nummer: <b>{item.customNumber}</b>
+										</Text>
+									)}
+									{item.customInitials && (
+										<Text fontSize="sm" color="gray.600">
+											Initialen: <b>{item.customInitials}</b>
+										</Text>
+									)}
 									<Text fontSize="sm" color="black">
 										€{item.price.toFixed(2)} pro Stück
 									</Text>
@@ -234,7 +248,11 @@ const Cart = () => {
 										onClick={() =>
 											updateQuantity(
 												item.id,
-												Math.max(0, item.quantity - 1)
+												Math.max(0, item.quantity - 1),
+												item.size,
+												item.customName,
+												item.customNumber,
+												item.customInitials
 											)
 										}
 									/>
@@ -248,7 +266,11 @@ const Cart = () => {
 										onClick={() =>
 											updateQuantity(
 												item.id,
-												item.quantity + 1
+												item.quantity + 1,
+												item.size,
+												item.customName,
+												item.customNumber,
+												item.customInitials
 											)
 										}
 									/>
@@ -262,7 +284,7 @@ const Cart = () => {
 									size="sm"
 									colorScheme="red"
 									variant="ghost"
-									onClick={() => removeFromCart(item.id)}
+									onClick={() => removeFromCart(item.id, item.size, item.customName, item.customNumber, item.customInitials)}
 								/>
 							</HStack>
 						</Box>
@@ -293,6 +315,10 @@ const Cart = () => {
 							<ModalCloseButton onClick={handleGoToShop} />
 							<ModalBody pb={6}>
 								<Text mb={4} fontWeight="bold">Vielen Dank für Ihre Bestellung!</Text>
+								<Text mb={4} fontWeight="bold">Bitte Überweisen sie den Betrag auf das folgende Konto:</Text>
+								<Text mb={4} fontWeight="bold">Empfänger: FÖV MTV Geismar</Text>
+								<Text mb={4} fontWeight="bold">IBAN: DE75 2605 0001 0000 1743 00</Text>
+								<Text mb={4} fontWeight="bold">Bitte geben Sie Ihren Namen & Bestellnummer als Verwendungszweck an.</Text>
 								{pdfUrl && (
 									<Box mt={4}>
 										<Button as="a" href={pdfUrl} download="rechnung.pdf" colorScheme="green" width="full">

@@ -8,13 +8,16 @@ interface CartItem {
   quantity: number;
   image: string;
   size?: string;
+  customName?: string;
+  customNumber?: string;
+  customInitials?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  removeFromCart: (id: string, size?: string, customName?: string, customNumber?: string, customInitials?: string) => void;
+  updateQuantity: (id: string, quantity: number, size?: string, customName?: string, customNumber?: string, customInitials?: string) => void;
   clearCart: () => void;
 }
 
@@ -25,24 +28,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (item: CartItem) => {
     setItems(currentItems => {
-      const existingItem = currentItems.find(i => i.id === item.id && i.size === item.size);
+      const existingItem = currentItems.find(i => 
+        i.id === item.id && 
+        i.size === item.size && 
+        i.customName === item.customName && 
+        i.customNumber === item.customNumber &&
+        i.customInitials === item.customInitials
+      );
       if (existingItem) {
         return currentItems.map(i =>
-          i.id === item.id && i.size === item.size ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id && 
+          i.size === item.size && 
+          i.customName === item.customName && 
+          i.customNumber === item.customNumber &&
+          i.customInitials === item.customInitials
+            ? { ...i, quantity: i.quantity + 1 } 
+            : i
         );
       }
       return [...currentItems, { ...item, quantity: 1 }];
     });
   };
 
-  const removeFromCart = (id: string) => {
-    setItems(currentItems => currentItems.filter(item => item.id !== id));
+  const removeFromCart = (id: string, size?: string, customName?: string, customNumber?: string, customInitials?: string) => {
+    setItems(currentItems => currentItems.filter(item => 
+      !(item.id === id && 
+        item.size === size && 
+        item.customName === customName && 
+        item.customNumber === customNumber &&
+        item.customInitials === customInitials)
+    ));
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = (id: string, quantity: number, size?: string, customName?: string, customNumber?: string, customInitials?: string) => {
     setItems(currentItems =>
       currentItems.map(item =>
-        item.id === id ? { ...item, quantity } : item
+        item.id === id && 
+        item.size === size && 
+        item.customName === customName && 
+        item.customNumber === customNumber &&
+        item.customInitials === customInitials
+          ? { ...item, quantity } 
+          : item
       )
     );
   };
