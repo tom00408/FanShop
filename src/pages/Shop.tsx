@@ -257,13 +257,20 @@ const Shop = () => {
                     />
                   )}
                   {product.hasInitials && (
-                    <Input
-                      mt={2}
-                      placeholder="Initialen (max. 2 Zeichen)"
-                      value={selectedInitials[product.id] || ''}
-                      onChange={e => handleInitialsChange(product.id, e.target.value)}
-                      maxLength={2}
-                    />
+                    <>
+                      <Input
+                        mt={2}
+                        placeholder="Initialen (max. 2 Zeichen)"
+                        value={selectedInitials[product.id] || ''}
+                        onChange={e => handleInitialsChange(product.id, e.target.value)}
+                        maxLength={2}
+                      />
+                      {selectedInitials[product.id] && (
+                        <Text mt={1} fontSize="sm" color="gray.600">
+                          + €3,50 für Initialisierung
+                        </Text>
+                      )}
+                    </>
                   )}
                   <Button
                     mt={4}
@@ -276,7 +283,8 @@ const Shop = () => {
                       size: selectedSizes[product.id],
                       customName: selectedNames[product.id],
                       customNumber: selectedNumbers[product.id],
-                      customInitials: selectedInitials[product.id]
+                      customInitials: selectedInitials[product.id],
+                      price: product.price + (selectedInitials[product.id] ? 3.5 : 0)
                     })}
                   >
                     In den Warenkorb

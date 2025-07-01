@@ -116,6 +116,8 @@ const Cart = () => {
 				if (item.customInitials) {
 					doc.text(`   Initialen: ${item.customInitials}`, 18, y);
 					y += 6;
+					doc.text(`   Initialisierung: +3,50€`, 18, y);
+					y += 6;
 				}
 			});
 			doc.text(' ', 14, y);
