@@ -15,6 +15,7 @@ type OrderData = {
   name: string;
   address: string;
   email: string;
+  telefon: string;
   team: string;
   status: string;
   items: Array<{
@@ -42,7 +43,7 @@ export const decryptData = (encryptedData: string): SensitiveData => {
 
 // Funktion zum Verschlüsseln sensibler Daten in einem Objekt
 export const encryptSensitiveData = (data: OrderData): OrderData => {
-  const sensitiveFields = ['name', 'address', 'email', 'team'] as const;
+  const sensitiveFields = ['name', 'address', 'email','telefon', 'team'] as const;
   const encryptedData = { ...data };
 
   sensitiveFields.forEach(field => {

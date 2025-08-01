@@ -276,7 +276,11 @@ const Shop = () => {
                     mt={4}
                     colorScheme="red"
                     width="full"
-                    isDisabled={product.size && product.size.length > 0 && !selectedSizes[product.id]}
+                    isDisabled={
+                      (product.size && product.size.length > 0 && !selectedSizes[product.id]) ||
+                      (product.hasName && !selectedNames[product.id]) ||
+                      (product.hasNumber && !selectedNumbers[product.id])
+                    }
                     onClick={() => addToCart({ 
                       ...product, 
                       quantity: 1, 

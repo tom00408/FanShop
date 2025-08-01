@@ -10,7 +10,7 @@ const Home = () => {
         <Container maxW="1200px">
           <Stack spacing={6} align="center" textAlign="center">
             <Heading size="2xl">Willkommen im MTV Geismar Shop</Heading>
-            <Text fontSize="xl">Entdecken Sie unsere exklusive Kollektion an Artikeln für Ihren Lieblingsverein</Text>
+            <Text fontSize="xl">Entdecken Sie unsere exklusive Kollektion an Artikeln für Ihren Lieblingsverein!</Text>
             <Button
               as={RouterLink}
               to="/shop"

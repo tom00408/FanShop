@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "postbuild": "cp .htaccess dist/.htaccess",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "node deploy.js"
@@ -17,7 +18,9 @@
     "@emotion/styled": "^11.14.0",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
-    "firebase": "^11.7.3",
+    "firebase": "^11.10.0",
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.4.0",
     "framer-motion": "^12.12.1",
     "jspdf": "^3.0.1",
     "react": "^19.1.0",

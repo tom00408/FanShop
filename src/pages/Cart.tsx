@@ -30,6 +30,7 @@ import { db } from '../firebase';
 import { collection, addDoc} from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { encryptSensitiveData } from '../utils/encryption';
+import { generateOrderNumberAtomic } from '../utils/orderNumber';
 
 
 const Cart = () => {
@@ -41,10 +42,11 @@ const Cart = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const initialRef = useRef(null);
 	const toast = useToast();
-	const [form, setForm] = useState({ name: '', address: '', email: '', team: '' });
+	const [form, setForm] = useState({ name: '', address: '', email: '',telefon: '', team: '' });
 	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 	const [sending, setSending] = useState(false);
 	const [showConfirmation, setShowConfirmation] = useState(false);
+	const [orderNumber, setOrderNumber] = useState<string>('');
 	const navigate = useNavigate();
 
 	const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,10 +59,16 @@ const Cart = () => {
 		// Bestellung in Firestore speichern
 		setSending(true);
 		try {
+			// Generiere eine eindeutige Bestellnummer
+			const generatedOrderNumber = await generateOrderNumberAtomic();
+			setOrderNumber(generatedOrderNumber);
+			
 			const orderData = {
+				orderNumber: generatedOrderNumber, // Neue Bestellnummer
 				name: form.name,
 				address: form.address,
 				email: form.email,
+				telefon: form.telefon,
 				team: form.team,
 				status: 'neu',
 				items: items.map(item => ({
@@ -81,23 +89,23 @@ const Cart = () => {
 			// Verschlüsseln der sensiblen Daten
 			const encryptedOrderData = encryptSensitiveData(orderData);
 
-			// Bestellung in Firestore speichern und ID abrufen
-			const orderRef = await addDoc(collection(db, 'bestellungen'), encryptedOrderData);
-			const orderId = orderRef.id;
+			// Bestellung in Firestore speichern
+			await addDoc(collection(db, 'bestellungen'), encryptedOrderData);
 
-			// PDF mit Bestellungs-ID generieren
+			// PDF mit Bestellnummer generieren
 			const doc = new jsPDF();
 			doc.setFontSize(18);
 			doc.text('Rechnung', 14, 18);
 			doc.setFontSize(12);
-			doc.text(`Bestellungs-ID: ${orderId}`, 14, 26);
-			doc.text(`Name: ${form.name}`, 14, 34);
-			doc.text(`Adresse: ${form.address}`, 14, 42);
-			doc.text(`E-Mail: ${form.email}`, 14, 50);
-			doc.text(`Team: ${form.team}`, 14, 58);
-			doc.text(' ', 14, 66);
-			doc.text('Produkte:', 14, 74);
-			let y = 82;
+			doc.text(`Bestellnummer: ${generatedOrderNumber}`, 14, 26);
+			doc.text(`Name: ${form.name}`, 14, 42);
+			doc.text(`Adresse: ${form.address}`, 14, 50);
+			doc.text(`E-Mail: ${form.email}`, 14, 58);
+			doc.text(`Telefon: ${form.telefon}`, 14, 66);
+			doc.text(`Team: ${form.team}`, 14, 74);
+			doc.text(' ', 14, 82);
+			doc.text('Produkte:', 14, 90);
+			let y = 98;
 			items.forEach((item, idx) => {
 				doc.text(
 					`${idx + 1}. ${item.name}${item.size ? ' (' + item.size + ')' : ''} x${item.quantity} á ${item.price.toFixed(2)}€ = ${(item.price * item.quantity).toFixed(2)}€`,
@@ -154,7 +162,8 @@ const Cart = () => {
 	const handleGoToShop = () => {
 		setShowConfirmation(false);
 		setPdfUrl(null);
-		setForm({ name: '', address: '', email: '', team: '' });
+		setForm({ name: '', address: '', email: '',telefon: '', team: '' });
+		setOrderNumber('');
 		onClose();
 		navigate('/shop');
 	};
@@ -317,13 +326,14 @@ const Cart = () => {
 							<ModalCloseButton onClick={handleGoToShop} />
 							<ModalBody pb={6}>
 								<Text mb={4} fontWeight="bold">Vielen Dank für Ihre Bestellung!</Text>
-								<Text mb={4} fontWeight="bold">Bitte Überweisen sie den Betrag auf das folgende Konto:</Text>
+								<Text mb={4} fontWeight="bold" color="primary.500" fontSize="lg">Bestellnummer: {orderNumber}</Text>
+								<Text mb={4} fontWeight="bold">Bitte überweisen Sie den Betrag auf das folgende Konto:</Text>
 								<Text mb={4} fontWeight="bold">Empfänger: FÖV MTV Geismar</Text>
 								<Text mb={4} fontWeight="bold">IBAN: DE75 2605 0001 0000 1743 00</Text>
 								<Text mb={4} fontWeight="bold">Bitte geben Sie Ihren Namen & Bestellnummer als Verwendungszweck an.</Text>
 								{pdfUrl && (
 									<Box mt={4}>
-										<Button as="a" href={pdfUrl} download="rechnung.pdf" colorScheme="green" width="full">
+										<Button as="a" href={pdfUrl} download={`rechnung-${orderNumber}.pdf`} colorScheme="green" width="full">
 											Rechnung herunterladen
 										</Button>
 									</Box>
@@ -353,12 +363,16 @@ const Cart = () => {
 									<Input name="email" type="email" value={form.email} onChange={handleInput} />
 								</FormControl>
 								<FormControl isRequired mb={3}>
+									<FormLabel>Telefon</FormLabel>
+									<Input name="telefon" value={form.telefon} onChange={handleInput} />
+								</FormControl>
+								<FormControl isRequired mb={3}>
 									<FormLabel>Team</FormLabel>
 									<Input name="team" value={form.team} onChange={handleInput} placeholder="z.B. Herren 1, Jugend, etc." />
 								</FormControl>
 								{pdfUrl && (
 									<Box mt={4}>
-										<Button as="a" href={pdfUrl} download="rechnung.pdf" colorScheme="green" width="full">
+										<Button as="a" href={pdfUrl} download={`rechnung-${orderNumber}.pdf`} colorScheme="green" width="full">
 											Rechnung herunterladen
 										</Button>
 									</Box>
