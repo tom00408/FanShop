@@ -42,12 +42,55 @@ const Cart = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const initialRef = useRef(null);
 	const toast = useToast();
-	const [form, setForm] = useState({ name: '', address: '', email: '',telefon: '', team: '' });
+	const [form, setForm] = useState({ name: '', address: '', email: '',telefon: '', team: '' ,hinweis: ''});
 	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 	const [sending, setSending] = useState(false);
 	const [showConfirmation, setShowConfirmation] = useState(false);
 	const [orderNumber, setOrderNumber] = useState<string>('');
 	const navigate = useNavigate();
+
+	// Funktion zum Versenden der Rechnung per E-Mail
+	const sendInvoiceEmail = async (pdfBlob: Blob, orderNumber: string, customerEmail: string, customerName: string) => {
+		try {
+			// PDF zu Base64 konvertieren
+			const arrayBuffer = await pdfBlob.arrayBuffer();
+			const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+			
+			// E-Mail-Versand API aufrufen
+			const response = await fetch('https://emailsender-v4ptja37ma-uc.a.run.app', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					to: customerEmail,
+					name: customerName,
+					filename: `rechnung-${orderNumber}.pdf`,
+					pdfBase64: base64String
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('E-Mail-Versand fehlgeschlagen');
+			}
+
+			toast({ 
+				title: 'Rechnung wurde per E-Mail versendet!', 
+				status: 'success', 
+				duration: 4000, 
+				isClosable: true 
+			});
+		} catch (error) {
+			console.error('Fehler beim E-Mail-Versand:', error);
+			toast({ 
+				title: 'E-Mail-Versand fehlgeschlagen', 
+				description: 'Die Rechnung wurde trotzdem erstellt und kann heruntergeladen werden.',
+				status: 'warning', 
+				duration: 4000, 
+				isClosable: true 
+			});
+		}
+	};
 
 	const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setForm({ ...form, [e.target.name]: e.target.value });
@@ -70,6 +113,7 @@ const Cart = () => {
 				email: form.email,
 				telefon: form.telefon,
 				team: form.team,
+				hinweis: form.hinweis,
 				status: 'neu',
 				items: items.map(item => ({
 					id: item.id,
@@ -150,6 +194,9 @@ const Cart = () => {
 			const url = URL.createObjectURL(pdfBlob);
 			setPdfUrl(url);
 
+			// Rechnung per E-Mail versenden
+			await sendInvoiceEmail(pdfBlob, generatedOrderNumber, form.email, form.name);
+
 			setShowConfirmation(true);
 			clearCart();
 		} catch (err) {
@@ -162,7 +209,7 @@ const Cart = () => {
 	const handleGoToShop = () => {
 		setShowConfirmation(false);
 		setPdfUrl(null);
-		setForm({ name: '', address: '', email: '',telefon: '', team: '' });
+		setForm({ name: '', address: '', email: '',telefon: '', team: '' ,hinweis: ''});
 		setOrderNumber('');
 		onClose();
 		navigate('/shop');
@@ -369,6 +416,10 @@ const Cart = () => {
 								<FormControl isRequired mb={3}>
 									<FormLabel>Team</FormLabel>
 									<Input name="team" value={form.team} onChange={handleInput} placeholder="z.B. Herren 1, Jugend, etc." />
+								</FormControl>
+								<FormControl mb={3}>
+									<FormLabel>Hinweis</FormLabel>
+									<Input name="hinweis" value={form.hinweis} onChange={handleInput} />
 								</FormControl>
 								{pdfUrl && (
 									<Box mt={4}>
