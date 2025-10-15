@@ -1,7 +1,6 @@
 import { Box, Container, Heading, Text, Image, Button, Stack, SimpleGrid } from '@chakra-ui/react'
 import { Link as RouterLink } from 'react-router-dom'
 
-
 const Home = () => {
   return (
     <Box>

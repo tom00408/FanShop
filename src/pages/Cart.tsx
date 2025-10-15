@@ -26,8 +26,9 @@ import { useCart } from '../context/CartContext';
 import { FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
 import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
-import { db } from '../firebase';
+import { db, functions } from '../firebase';
 import { collection, addDoc} from 'firebase/firestore';
+import {  httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
 import { encryptSensitiveData } from '../utils/encryption';
 import { generateOrderNumberAtomic } from '../utils/orderNumber';
@@ -56,23 +57,18 @@ const Cart = () => {
 			const arrayBuffer = await pdfBlob.arrayBuffer();
 			const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 			
-			// E-Mail-Versand API aufrufen
-			const response = await fetch('https://emailsender-v4ptja37ma-uc.a.run.app', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					to: customerEmail,
-					name: customerName,
-					filename: `rechnung-${orderNumber}.pdf`,
-					pdfBase64: base64String
-				})
+			// Firebase Functions initialisieren
+		
+			const sendEmail = httpsCallable(functions, 'shopOrderEmail');
+			
+			// Callable Function aufrufen
+			const result = await sendEmail({
+				to: customerEmail,
+				name: customerName,
+				filename: `rechnung-${orderNumber}.pdf`,
+				pdfBase64: base64String
 			});
-
-			if (!response.ok) {
-				throw new Error('E-Mail-Versand fehlgeschlagen');
-			}
+			console.log(result);
 
 			toast({ 
 				title: 'Rechnung wurde per E-Mail versendet!', 
