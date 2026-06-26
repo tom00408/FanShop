@@ -137,7 +137,7 @@ const ProductCard = ({ product }: { product: Product }) => {
               <Flex position="absolute" bottom={3} right={3} gap={1}>
                 <Box
                   as="button"
-                  onClick={() => setActiveImage('front')}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); setActiveImage('front') }}
                   bg={activeImage === 'front' ? '#E30613' : 'rgba(255,255,255,0.9)'}
                   color={activeImage === 'front' ? 'white' : 'gray.700'}
                   borderRadius="full"
@@ -154,7 +154,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                 </Box>
                 <Box
                   as="button"
-                  onClick={() => setActiveImage('back')}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); setActiveImage('back') }}
                   bg={activeImage === 'back' ? '#E30613' : 'rgba(255,255,255,0.9)'}
                   color={activeImage === 'back' ? 'white' : 'gray.700'}
                   borderRadius="full"
