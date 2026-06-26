@@ -22,6 +22,7 @@ import { collection, getDocs } from 'firebase/firestore'
 import { getDownloadURL, ref } from 'firebase/storage'
 import { FiSearch, FiChevronLeft, FiChevronRight, FiShoppingCart, FiCheck, FiX } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
 const MotionBox = motion(Box as any)
 
@@ -80,6 +81,7 @@ const ProductCard = ({ product }: { product: Product }) => {
   const [added, setAdded] = useState(false)
   const { addToCart } = useCart()
   const toast = useToast()
+  const navigate = useNavigate()
 
   const isDisabled =
     (!!product.size?.length && !selectedSize) ||
@@ -124,7 +126,14 @@ const ProductCard = ({ product }: { product: Product }) => {
       flexDirection="column"
     >
       {/* Image area */}
-      <Box position="relative" h="280px" bg="gray.50" overflow="hidden">
+      <Box
+        position="relative"
+        h="280px"
+        bg="gray.50"
+        overflow="hidden"
+        cursor="pointer"
+        onClick={() => navigate(`/produkt/${product.id}`)}
+      >
         {product.imageLoading ? (
           <Skeleton height="100%" />
         ) : product.image ? (
@@ -148,7 +157,7 @@ const ProductCard = ({ product }: { product: Product }) => {
               <Flex position="absolute" bottom={3} right={3} gap={1}>
                 <Box
                   as="button"
-                  onClick={() => setActiveImage('front')}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); setActiveImage('front') }}
                   bg={activeImage === 'front' ? '#E30613' : 'rgba(255,255,255,0.9)'}
                   color={activeImage === 'front' ? 'white' : 'gray.700'}
                   borderRadius="full"
@@ -165,7 +174,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                 </Box>
                 <Box
                   as="button"
-                  onClick={() => setActiveImage('back')}
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); setActiveImage('back') }}
                   bg={activeImage === 'back' ? '#E30613' : 'rgba(255,255,255,0.9)'}
                   color={activeImage === 'back' ? 'white' : 'gray.700'}
                   borderRadius="full"
@@ -210,7 +219,22 @@ const ProductCard = ({ product }: { product: Product }) => {
 
       {/* Info */}
       <Box p={5} display="flex" flexDirection="column" flex={1}>
-        <Heading size="sm" color="gray.900" fontWeight="800" mb={1}>{product.name}</Heading>
+        <Flex justify="space-between" align="center" mb={1}>
+          <Heading size="sm" color="gray.900" fontWeight="800">{product.name}</Heading>
+          <Text
+            fontSize="xs"
+            fontWeight="700"
+            color="gray.400"
+            cursor="pointer"
+            _hover={{ color: '#E30613' }}
+            transition="color 0.2s"
+            flexShrink={0}
+            ml={2}
+            onClick={() => navigate(`/produkt/${product.id}`)}
+          >
+            Details →
+          </Text>
+        </Flex>
         <Text color="#E30613" fontWeight="800" fontSize="lg" mb={4}>
           €{product.price.toFixed(2)}
           {!!customInitials && (
