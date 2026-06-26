@@ -18,7 +18,13 @@ const pageVariants = {
 }
 
 const Page = ({ children }: { children: React.ReactNode }) => (
-  <motion.div variants={pageVariants} initial="initial" animate="in" exit="out">
+  <motion.div
+    variants={pageVariants}
+    initial="initial"
+    animate="in"
+    exit="out"
+    style={{ width: '100%', overflowX: 'hidden' }}
+  >
     {children}
   </motion.div>
 )
