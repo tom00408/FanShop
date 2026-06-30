@@ -253,7 +253,7 @@ const ProductCard = ({ product }: { product: Product }) => {
               borderColor="gray.200"
               _focus={{ borderColor: '#E30613', boxShadow: '0 0 0 1px #E30613' }}
             >
-              {product.size.map(s => <option key={s} value={s}>{s}</option>)}
+              {[...new Set(product.size)].map(s => <option key={s} value={s}>{s}</option>)}
             </Select>
           )}
           {product.hasName && (

@@ -409,29 +409,6 @@ const RundschauSection = () => (
   </Box>
 )
 
-// ─── Footer ─────────────────────────────────────────────────────────────────
-
-const FooterSection = () => (
-  <Box bg="#080001" py={10}>
-    <Container maxW="1200px" px={6}>
-      <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
-        <Flex align="center" gap={3}>
-          <Image src={logo} h="36px" bg="white" borderRadius="full" p="4px" opacity={0.8} />
-          <Text color="rgba(255,255,255,0.4)" fontSize="sm" fontWeight="600">MTV Geismar e.V.</Text>
-        </Flex>
-        <Flex direction="column" align={{ base: 'flex-start', sm: 'flex-end' }} gap={1}>
-          <Text color="rgba(255,255,255,0.25)" fontSize="xs">
-            © {new Date().getFullYear()} MTV Geismar — Alle Rechte vorbehalten
-          </Text>
-          <Text color="rgba(255,255,255,0.2)" fontSize="xs">
-            {import.meta.env.VITE_APP_VERSION}
-          </Text>
-        </Flex>
-      </Flex>
-    </Container>
-  </Box>
-)
-
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 const Home = () => (
@@ -441,7 +418,6 @@ const Home = () => (
     <LatestProductsSection />
     <EditorialGallery />
     <RundschauSection />
-    <FooterSection />
   </Box>
 )
 

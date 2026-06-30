@@ -4,12 +4,14 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence, motion } from 'framer-motion'
 import Navbar from './components/Navbar'
 import CartDrawer from './components/CartDrawer'
+import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import ProductDetail from './pages/ProductDetail'
+import Widerruf from './pages/Widerruf'
 import { CartProvider } from './context/CartContext'
 
 const pageVariants = {
@@ -40,6 +42,7 @@ function AppRoutes() {
         <Route path="/cart" element={<Page><Cart /></Page>} />
         <Route path="/checkout" element={<Page><Checkout /></Page>} />
         <Route path="/produkt/:id" element={<Page><ProductDetail /></Page>} />
+        <Route path="/widerruf" element={<Page><Widerruf /></Page>} />
       </Routes>
     </AnimatePresence>
   )
@@ -54,6 +57,7 @@ function App() {
           <Navbar />
           <CartDrawer />
           <AppRoutes />
+          <Footer />
         </Router>
       </CartProvider>
     </ChakraProvider>
