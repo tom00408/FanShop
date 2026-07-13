@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 interface CartItem {
@@ -19,14 +19,31 @@ interface CartContextType {
   removeFromCart: (id: string, size?: string, customName?: string, customNumber?: string, customInitials?: string) => void;
   updateQuantity: (id: string, quantity: number, size?: string, customName?: string, customNumber?: string, customInitials?: string) => void;
   clearCart: () => void;
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('fanshop-cart')
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('fanshop-cart', JSON.stringify(items)) } catch {}
+  }, [items]);
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
 
   const addToCart = (item: CartItem) => {
+    setIsCartOpen(true);
     setItems(currentItems => {
       const existingItem = currentItems.find(i => 
         i.id === item.id && 
@@ -79,7 +96,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, isCartOpen, openCart, closeCart }}>
       {children}
     </CartContext.Provider>
   );
