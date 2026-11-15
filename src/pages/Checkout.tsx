@@ -152,6 +152,34 @@ const Checkout = () => {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // HTML-required lässt reine Leerzeichen durch, deshalb hier selbst prüfen
+    const trimmed: FormData = {
+      name: form.name.trim(),
+      address: form.address.trim(),
+      email: form.email.trim(),
+      telefon: form.telefon.trim(),
+      team: form.team.trim(),
+      hinweis: form.hinweis.trim(),
+    }
+    const fehlend: string[] = []
+    if ((trimmed.name.match(/\p{L}/gu) || []).length < 2) fehlend.push('Name')
+    if (!trimmed.address) fehlend.push('Adresse')
+    if (!trimmed.email) fehlend.push('E-Mail')
+    if (!trimmed.telefon) fehlend.push('Telefon')
+    if (!trimmed.team) fehlend.push('Team')
+    setForm(trimmed)
+    if (fehlend.length > 0) {
+      toast({
+        title: 'Bitte Angaben prüfen',
+        description: `Folgende Felder fehlen oder sind leer: ${fehlend.join(', ')}`,
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      })
+      return
+    }
+
     setStep('confirm')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
